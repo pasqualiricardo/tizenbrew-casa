@@ -1,0 +1,10 @@
+{
+  "name": "tizenbrew-casa",
+  "version": "0.1.0",
+  "description": "Cámaras de casa y estado de la tele, para Samsung con TizenBrew",
+  "packageType": "app",
+  "appName": "Casa",
+  "appPath": "index.html",
+  "serviceFile": "service.js",
+  "keys": []
+}

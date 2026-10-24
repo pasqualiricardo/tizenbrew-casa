@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>Casa</title>
+  <style>
+    html, body { margin: 0; height: 100%; background: #0b0d10; color: #e8eaed; font-family: sans-serif; }
+    p { font-size: 38px; padding: 80px; }
+  </style>
+</head>
+<body>
+  <p id="msg">Conectando con la casa…</p>
+  <script>
+    // La app vive en el puente de la red local; este módulo solo la abre y le pasa los
+    // parámetros que manda TizenBrew (por ejemplo view=cam&c=casa_portero&t=40).
+    var PUENTE = 'http://192.168.0.8:8090';
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', PUENTE + '/api/cameras');
+    xhr.timeout = 6000;
+    xhr.onload = function () {
+      if (xhr.status === 200) location.replace(PUENTE + '/tv/' + location.search);
+      else document.getElementById('msg').textContent = 'El puente respondió ' + xhr.status + '.';
+    };
+    xhr.onerror = xhr.ontimeout = function () {
+      document.getElementById('msg').textContent = 'No encuentro el puente de la casa (' + PUENTE + ').';
+    };
+    xhr.send();
+  </script>
+</body>
+</html>
