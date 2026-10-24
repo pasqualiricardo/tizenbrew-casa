@@ -9,6 +9,10 @@ var os = require('os');
 var execFile = require('child_process').execFile;
 
 var PUERTO = 8099;
+// Solo la propia tele (la app "Casa" pide a 127.0.0.1) y la Mac de casa pueden consultarlo.
+var CLIENTES = ['127.0.0.1', '::ffff:127.0.0.1', '::1', '192.168.0.121', '::ffff:192.168.0.121'];
+// Origen de la app "Casa" (el puente): el único al que el navegador le deja leer la respuesta.
+var ORIGEN_APP = 'http://192.168.0.8:8090';
 
 function leer(ruta) {
   try {
@@ -62,7 +66,7 @@ function discos(listo) {
       vistos[c[0]] = true;
       out.push({ mount: c[5], totalKb: totalKb, usedKb: parseInt(c[2], 10), pct: parseInt(c[4], 10) });
     });
-    listo(out, err ? String(err) : null);
+    listo(out);
   });
 }
 
@@ -78,15 +82,19 @@ function diag(listo) {
     meminfo: meminfo(),
     procesos: procesos()
   };
-  discos(function (lista, error) {
+  discos(function (lista) {
     datos.storage = lista;
-    if (error) datos.storageError = error;
     listo(datos);
   });
 }
 
 var servidor = http.createServer(function (req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  if (CLIENTES.indexOf(req.socket.remoteAddress) < 0) {
+    res.statusCode = 403;
+    res.end();
+    return;
+  }
+  if (req.headers.origin === ORIGEN_APP) res.setHeader('Access-Control-Allow-Origin', ORIGEN_APP);
   if (req.method === 'GET' && req.url.indexOf('/diag') === 0) {
     diag(function (datos) {
       res.setHeader('Content-Type', 'application/json');
